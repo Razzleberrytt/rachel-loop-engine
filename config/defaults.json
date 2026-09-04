@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "variants": ["natural", "retention", "loop"],
+  "create_variants_only_when_meaningful": true,
+  "captions_enabled": true,
+  "caption_mode": "phrase",
+  "force_loop": false,
+  "minimum_loop_score": 3.6,
+  "preferred_loop_score": 4.2,
+  "qc_minimum_dimension_score": 3,
+  "preserve_source_meaning": true,
+  "allow_structural_reorder": true,
+  "generic_cta_enabled": false
+}

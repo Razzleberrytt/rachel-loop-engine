@@ -1,0 +1,14 @@
+__pycache__/
+.pytest_cache/
+.venv/
+*.pyc
+.env
+.env.*
+media/
+raw/
+exports/
+*.mp4
+*.mov
+*.m4v
+*.avi
+*.mkv

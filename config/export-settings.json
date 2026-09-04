@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "width": 1080,
+  "height": 1920,
+  "aspect_ratio": "9:16",
+  "fps": 30,
+  "video_codec": "h264",
+  "audio_codec": "aac",
+  "watermark": false,
+  "resolution_label": "1080p"
+}

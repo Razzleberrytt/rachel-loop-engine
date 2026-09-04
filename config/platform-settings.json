@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "platforms": {
+    "facebook_reels": {
+      "enabled": true,
+      "aspect_ratio": "9:16"
+    },
+    "tiktok": {
+      "enabled": true,
+      "aspect_ratio": "9:16"
+    },
+    "youtube_shorts": {
+      "enabled": true,
+      "aspect_ratio": "9:16"
+    }
+  }
+}
