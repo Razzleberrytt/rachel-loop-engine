@@ -1,13 +1,7 @@
-"""Rachel Loop Engine core package."""
-
-from .models import LoopScores, Moment, VariantPlan, VideoJob
+"""Rachel Loop Engine."""
+from .models import AnalysisResult, LoopScores, Moment, QcResult, SourceSpec, VariantPlan, VideoJob
+from .pipeline import RachelLoopPipeline
 from .scoring import loop_decision, loop_score
 
-__all__ = [
-    "LoopScores",
-    "Moment",
-    "VariantPlan",
-    "VideoJob",
-    "loop_score",
-    "loop_decision",
-]
+__all__ = ["AnalysisResult", "LoopScores", "Moment", "QcResult", "SourceSpec", "VariantPlan", "VideoJob", "RachelLoopPipeline", "loop_decision", "loop_score"]
+__version__ = "0.3.0"
