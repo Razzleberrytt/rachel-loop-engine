@@ -10,13 +10,6 @@ from .edl import LocalEditPlan
 
 @dataclass(frozen=True)
 class CreativeFingerprint:
-    """Machine-readable creative identity attached to a rendered post.
-
-    The fingerprint deliberately stores editing *mechanics* separately from
-    performance. That lets the analytics layer ask which combinations repeatedly
-    outperform without relying on memory or one-off viral anecdotes.
-    """
-
     variant: str
     duration_seconds: float
     source_duration_seconds: float
@@ -59,11 +52,10 @@ class CreativeFingerprint:
         record["runtime_reduction_percent"] = round(self.runtime_reduction_percent, 4)
         if self.opening_source_timestamp is not None:
             record["opening_source_timestamp"] = round(self.opening_source_timestamp, 4)
-        record["fingerprint_id"] = self.fingerprint_id if "fingerprint_id" not in record else record["fingerprint_id"]
         return record
 
     def to_record(self) -> dict[str, object]:
-        record = asdict(self)
+        record = self.normalized_record()
         record["fingerprint_id"] = self.fingerprint_id
         return record
 
@@ -94,11 +86,8 @@ def fingerprint_from_plan(
     inferred_score = loop_score if loop_score is not None else _optional_float(metadata.get("loop_score"))
     reduction = max(0.0, 1.0 - plan.output_duration / source_duration) * 100
     return CreativeFingerprint(
-        variant=str(plan.variant),
-        duration_seconds=plan.output_duration,
-        source_duration_seconds=source_duration,
-        loop_type=inferred_loop,
-        loop_score=inferred_score,
+        variant=str(plan.variant), duration_seconds=plan.output_duration, source_duration_seconds=source_duration,
+        loop_type=inferred_loop, loop_score=inferred_score,
         hook_type=hook_type or str(metadata.get("hook_type") or "unknown"),
         caption_style=caption_style or str(metadata.get("caption_style") or "unknown"),
         audio_mode=audio_mode or str(metadata.get("audio_mode") or "unknown"),
@@ -108,8 +97,7 @@ def fingerprint_from_plan(
         motion_level=motion_level or str(metadata.get("motion_level") or "unknown"),
         opening_motion=opening_motion if opening_motion is not None else _optional_bool(metadata.get("opening_motion")),
         opening_source_timestamp=plan.segments[0].source_start if plan.segments else None,
-        chronological_reorder=chronological_reorder,
-        runtime_reduction_percent=reduction,
+        chronological_reorder=chronological_reorder, runtime_reduction_percent=reduction,
         content_class=content_class or str(metadata.get("content_class") or "unknown"),
         text_overlay=text_overlay or str(metadata.get("text_overlay") or "unknown"),
         extra=dict(extra or metadata.get("fingerprint_extra") or {}),
@@ -131,8 +119,6 @@ def _optional_bool(value: object) -> bool | None:
     if isinstance(value, bool):
         return value
     if isinstance(value, str):
-        if value.lower() in {"true", "yes", "1"}:
-            return True
-        if value.lower() in {"false", "no", "0"}:
-            return False
+        if value.lower() in {"true", "yes", "1"}: return True
+        if value.lower() in {"false", "no", "0"}: return False
     return None

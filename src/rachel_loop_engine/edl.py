@@ -30,6 +30,26 @@ class Segment:
         return self.source_end - self.source_start
 
 
+@dataclass(frozen=True)
+class TextOverlay:
+    text: str
+    start_seconds: float
+    end_seconds: float
+    y_ratio: float = 0.16
+    font_size: int = 54
+    border_width: int = 3
+
+    def __post_init__(self) -> None:
+        if not self.text.strip():
+            raise ValueError("overlay text cannot be empty")
+        if self.start_seconds < 0 or self.end_seconds <= self.start_seconds:
+            raise ValueError("overlay must satisfy 0 <= start < end")
+        if not 0 <= self.y_ratio <= 1:
+            raise ValueError("y_ratio must be between 0 and 1")
+        if self.font_size <= 0 or self.border_width < 0:
+            raise ValueError("font_size must be > 0 and border_width >= 0")
+
+
 @dataclass
 class LocalEditPlan:
     """Portable, editor-independent instructions for one rendered variant."""
@@ -44,6 +64,7 @@ class LocalEditPlan:
     loop_anchor: float | None = None
     notes: list[str] = field(default_factory=list)
     metadata: dict[str, Any] = field(default_factory=dict)
+    text_overlays: list[TextOverlay] = field(default_factory=list)
 
     def validate(self, source_duration: float) -> None:
         if source_duration <= 0:
@@ -59,18 +80,16 @@ class LocalEditPlan:
                 )
         if self.loop_anchor is not None and not 0 <= self.loop_anchor <= source_duration:
             raise ValueError("loop_anchor must lie inside source duration")
+        for overlay in self.text_overlays:
+            if overlay.end_seconds > self.output_duration + 1e-6:
+                raise ValueError("text overlay extends beyond output duration")
 
     @property
     def output_duration(self) -> float:
         return sum(segment.duration for segment in self.segments)
 
     def loop_seam_is_source_contiguous(self, tolerance: float | None = None) -> bool:
-        """True when replay reconnects two adjacent points from the original source.
-
-        A cyclic timeline rotation has first.source_start == last.source_end.
-        That is stronger than a visual-similarity heuristic because the replay
-        seam reconstructs an original source boundary instead of fabricating one.
-        """
+        """True when replay reconnects two adjacent points from the original source."""
         if self.loop_anchor is None or not self.segments:
             return False
         if tolerance is None:
@@ -91,4 +110,5 @@ def dump_plan(plan: LocalEditPlan, path: str | Path) -> Path:
 def load_plan(path: str | Path) -> LocalEditPlan:
     data = json.loads(Path(path).read_text(encoding="utf-8"))
     data["segments"] = [Segment(**item) for item in data.get("segments", [])]
+    data["text_overlays"] = [TextOverlay(**item) for item in data.get("text_overlays", [])]
     return LocalEditPlan(**data)
