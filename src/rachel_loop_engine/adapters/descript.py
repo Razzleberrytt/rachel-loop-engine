@@ -26,11 +26,16 @@ class DescriptAdapter:
         if not project_id:
             raise RuntimeError("Descript import completed without project_id")
         return DescriptProjectRef(project_id=str(project_id), composition_id=body.get("composition_id"))
-    def edit(self, ref: DescriptProjectRef, prompt: str) -> dict[str, Any]:
+    def agent(self, ref: DescriptProjectRef, prompt: str) -> dict[str, Any]:
+        """Run the project agent and return its terminal result body."""
         payload: dict[str, Any] = {"project_id": ref.project_id, "prompt": prompt}
         if ref.composition_id:
             payload["composition_id"] = ref.composition_id
         return _result_body(self.transport.wait(_job_id(self.transport.run_agent(payload))))
+
+    def edit(self, ref: DescriptProjectRef, prompt: str) -> dict[str, Any]:
+        """Backward-compatible alias for mutation-oriented agent calls."""
+        return self.agent(ref, prompt)
     def inspect(self, project_id: str) -> dict[str, Any]:
         return self.transport.get_project(project_id)
     def compositions(self, project_id: str) -> list[CompositionRef]:

@@ -3,8 +3,9 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 from .adapters.descript import CompositionRef, DescriptAdapter, DescriptProjectRef
-from .models import VariantArtifact, VariantKind, VideoJob
+from .models import QcResult, VariantArtifact, VariantKind, VideoJob
 from .prompts import PromptBook
+from .review import MediaReview, parse_media_review, recommend_variant, review_to_dict
 
 VARIANT_NAMES: dict[VariantKind, str] = {
     "natural": "A Natural",
@@ -23,12 +24,7 @@ class WorkflowResult:
 
 
 class DescriptWorkflowRunner:
-    """Idempotent one-source -> named variants -> review renders coordinator.
-
-    A restart must not create a second project merely because the process lost
-    local memory. Durable IDs in ``VideoJob.metadata`` are treated as the source
-    of truth and are verified by project inspection before more mutations occur.
-    """
+    """Idempotent one-source -> named variants -> review renders coordinator."""
 
     def __init__(self, adapter: DescriptAdapter, prompts: PromptBook):
         self.adapter = adapter
@@ -106,6 +102,55 @@ class DescriptWorkflowRunner:
         job.touch()
         return result
 
+
+    def review_variants(
+        self,
+        job: VideoJob,
+        *,
+        kinds: tuple[VariantKind, ...] = ("natural", "retention", "loop"),
+    ) -> list[MediaReview]:
+        """Ask the editor agent to inspect finished compositions without mutation."""
+        project_id = str(job.metadata.get("descript_project_id", ""))
+        if not project_id:
+            raise RuntimeError("job has no descript_project_id; call prepare_variants first")
+        compositions = self._canonical_compositions(project_id)
+        base_prompt = self.prompts.load("descript-qc-review.md")
+        reviews: list[MediaReview] = []
+        for kind in kinds:
+            comp = compositions.get(kind)
+            if comp is None:
+                continue
+            prompt = base_prompt + f"\n\n## Runtime target\nvariant_kind: {kind}\ncomposition_name: {VARIANT_NAMES[kind]}\n"
+            before = comp
+            result = self.adapter.agent(DescriptProjectRef(project_id, comp.id), prompt)
+            after = self.adapter.find_composition(project_id, VARIANT_NAMES[kind])
+            if after is None:
+                raise RuntimeError(f"media-aware QC removed or renamed canonical composition: {VARIANT_NAMES[kind]}")
+            if _duration_changed(before.duration, after.duration):
+                raise RuntimeError(
+                    f"media-aware QC changed composition duration for {VARIANT_NAMES[kind]}: "
+                    f"{before.duration} -> {after.duration}"
+                )
+            response = str(result.get("agent_response", ""))
+            review = parse_media_review(response, kind)
+            reviews.append(review)
+            artifact = self._artifact_for_composition(job, kind, project_id, comp.id)
+            if artifact is None:
+                artifact = VariantArtifact(kind=kind, project_id=project_id, composition_id=comp.id)
+                job.artifacts.append(artifact)
+            artifact.qc = QcResult(
+                passed=review.passed,
+                score=review.overall_score,
+                failures=[] if review.passed else ["media-aware QC failed"],
+                warnings=review.warnings,
+            )
+            artifact.metadata["media_review"] = review_to_dict(review)
+            artifact.metadata["qc_agent_reported_project_changed"] = bool(result.get("project_changed", False))
+            artifact.metadata["qc_fingerprint_stable"] = True
+        job.metadata["recommended_variant"] = recommend_variant(reviews)
+        job.touch()
+        return reviews
+
     def _canonical_compositions(self, project_id: str) -> dict[VariantKind, CompositionRef]:
         by_name = {comp.name.casefold().strip(): comp for comp in self.adapter.compositions(project_id)}
         found: dict[VariantKind, CompositionRef] = {}
@@ -123,6 +168,18 @@ class DescriptWorkflowRunner:
         }
 
     @staticmethod
+    def _artifact_for_composition(
+        job: VideoJob,
+        kind: VariantKind,
+        project_id: str,
+        composition_id: str,
+    ) -> VariantArtifact | None:
+        for artifact in job.artifacts:
+            if artifact.kind == kind and artifact.project_id == project_id and artifact.composition_id == composition_id:
+                return artifact
+        return None
+
+    @staticmethod
     def _published_artifact(
         job: VideoJob,
         kind: VariantKind,
@@ -138,3 +195,9 @@ class DescriptWorkflowRunner:
             ):
                 return artifact
         return None
+
+
+def _duration_changed(before: float | None, after: float | None, tolerance: float = 0.05) -> bool:
+    if before is None or after is None:
+        return before != after
+    return abs(float(before) - float(after)) > tolerance

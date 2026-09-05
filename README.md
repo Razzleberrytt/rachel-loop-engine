@@ -6,7 +6,7 @@ A retention-first short-form video system for turning Rachel's raw vertical foot
 
 `private raw video -> understand -> A/B/C edits -> loop if earned -> QC -> review renders -> learn`
 
-## v0.4 status
+## v0.5 status
 
 This is now more than an editing playbook. The repository contains an executable, restart-safe orchestration foundation and its core Descript path has been smoke-tested live with synthetic media.
 
@@ -32,6 +32,8 @@ This is now more than an editing playbook. The repository contains an executable
 - conservative analytics-learning foundation
 - Python 3.11/3.12 CI
 - live URL-based Descript integration verification
+- structured non-mutating media-aware QC
+- automatic variant recommendation + persisted review card
 
 ## Creative constitution
 
@@ -93,6 +95,7 @@ Direct chat-attachment upload is not yet end-to-end in this execution environmen
 - `analytics/` — measurement definitions and learned rules
 - `experiments/` — hypotheses and promoted winners
 - `docs/LIVE_INTEGRATION_REPORT.md` — real connector validation
+- `docs/MEDIA_QC.md` — structured finished-video review contract
 - `src/rachel_loop_engine/` — executable engine
 - `tests/` — deterministic tests
 

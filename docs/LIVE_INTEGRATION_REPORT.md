@@ -22,6 +22,8 @@ Verified against a live Descript project:
 8. Resolve actual composition UUIDs from project state rather than guessing IDs.
 9. Publish `A Natural` as a 1080p unlisted review render.
 10. Wait for the render job and verify a successful share URL was returned.
+11. Run a non-mutating structured QC prompt against the real `A Natural` composition.
+12. Verify the agent returned the exact `RLE_REVIEW_JSON` contract and correctly failed the intentionally unusable synthetic fixture rather than inventing positive quality.
 
 This validates the repository's core editor-transport design against the real connected Descript surface, not only the mock transport.
 
@@ -57,3 +59,7 @@ For Rachel's first real end-to-end job, use a private Drive/Dropbox/direct-acces
 ## Next integration gate
 
 Process one real Rachel source from a private supported URL through the full creative prompt, then evaluate the actual A/B/C edits visually and update Rachel-specific rules from observed quality rather than assumptions.
+
+## Structured QC live finding
+
+The live agent honored the machine-readable QC response contract. It identified the synthetic fixture as unsuitable (too short/black/no meaningful transcript or audio) and returned `passed=false`. The agent also reported `project_changed=true` despite an inspection-only instruction, so v0.5 adds a before/after canonical-composition fingerprint guard using name + duration. A material change causes QC to fail closed.

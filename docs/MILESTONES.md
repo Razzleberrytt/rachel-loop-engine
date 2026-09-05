@@ -25,8 +25,8 @@ Verified live with synthetic media:
 
 Direct chat-attachment byte upload remains a transport gap because this execution environment cannot perform the signed external `PUT`. Drive/Dropbox/direct-access URLs are the current private-media path.
 
-## M3 — Automatic Multi-variant Production ✅ coordinator / 🟡 real-content validation
-The coordinator creates/resolves/publishes A Natural, B Retention, and C Loop and reuses existing state on retries. The next gate is visual validation on a real Rachel clip.
+## M3 — Automatic Multi-variant Production ✅ coordinator + media-aware QC / 🟡 real-content validation
+The coordinator creates/resolves/publishes A Natural, B Retention, and C Loop, reuses existing state on retries, runs structured non-mutating QC, persists review results, and recommends the strongest passing variant. The next gate is calibration on a real Rachel clip.
 
 ## M4 — Analytics Learning Loop 🟡 foundation
 Ingest retention/replay/completion metrics, compare variants, and promote repeatable wins only after an evidence gate.
