@@ -1,0 +1,17 @@
+{
+  "job_id": "example-001",
+  "source": {
+    "uri": "https://example.invalid/rachel-raw.mp4",
+    "duration_seconds": 31.7,
+    "filename": "rachel-raw.mp4",
+    "content_type": "video/mp4",
+    "language": "en"
+  },
+  "premise": "Infer from footage",
+  "variants": [],
+  "status": "created",
+  "artifacts": [],
+  "created_at": "2026-09-04T00:00:00+00:00",
+  "updated_at": "2026-09-04T00:00:00+00:00",
+  "metadata": {}
+}

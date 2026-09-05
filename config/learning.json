@@ -1,0 +1,5 @@
+{
+  "minimum_examples_for_promotion": 3,
+  "minimum_median_relative_lift": 0.08,
+  "note": "Internal evidence gate; not a platform algorithm claim."
+}

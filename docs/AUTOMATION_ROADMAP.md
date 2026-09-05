@@ -1,89 +1,45 @@
 # Automation Roadmap
 
-## Phase 1 — Brain (v1)
+## Target experience
 
-Status: repository foundation.
+Rachel records a normal phone video. The operator supplies the raw file once. The system returns polished, captioned, loop-aware variants plus a concise review summary.
 
-Deliverables:
-- canonical rules
-- Rachel style
-- loop scoring
-- QC gates
-- structured prompts
-- metrics schema
-- experiment system
+## Completed foundation
 
-## Phase 2 — Assisted Descript workflow
+- versioned creative brain and Rachel-specific guardrails
+- loop scoring and deterministic plan QC
+- durable job/source/artifact manifests
+- CLI and dry-run validation
+- transport-neutral editor boundary
+- Descript import/edit/inspect/publish coordinator
+- named A/B/C composition workflow
+- mock transport and automated tests
+- analytics ranking and conservative rule-promotion foundation
 
-Goal: raw upload + one instruction should produce a strong Descript project.
+## Next: live bridge
 
-Steps:
-1. import raw media
-2. transcribe
-3. run master analysis
-4. execute structural cuts
-5. caption/reframe/audio pass
-6. create loop candidate
-7. QC
-8. publish/share review version
+Map the in-product connected Descript tools to `EditorTransport` and persist connector job IDs. Process a real raw clip end-to-end without changing the creative rules.
 
-Human role: choose/approve final variant.
+## Then: automated analysis
 
-## Phase 3 — Structured planner
+Add a video-capable analyzer that outputs structured moments (hook/context/payoff/reaction/dead-air/loop-bridge/risk), transcript, premise, and candidate loop scores. Require schema validation before edits are issued.
 
-Implement machine-readable `VideoJob`, `Moment`, `EditPlan`, `VariantPlan`, and `QCReport` objects.
+## Then: review minimization
 
-The planner should output edit decisions independently of Descript. This makes the system portable.
+Generate a compact review card containing:
+- A/B/C duration
+- chosen hook
+- loop type/viability
+- major reorderings
+- QC warnings
+- recommended publish variant
 
-## Phase 4 — One-input orchestrator
+Human review becomes exception-based rather than frame-by-frame.
 
-Target command:
+## Then: feedback learning
 
-`rle process <raw-video>`
+Ingest platform metrics, compare comparable variants, and promote patterns only after the evidence gate is satisfied. One viral outlier must never rewrite permanent style rules.
 
-Or UI:
+## Ultimate state
 
-`Upload Raw Video -> Process -> Review A/B/C -> Export`
-
-Add:
-- job state
-- retries
-- failure reporting
-- asset IDs
-- deterministic schema validation
-- provenance/source timestamps
-
-## Phase 5 — Performance ingestion
-
-After posting, ingest platform analytics manually or via permitted APIs/connectors.
-
-Compare:
-- loop vs non-loop
-- hook families
-- durations
-- caption styles
-- structural reorder choices
-
-## Phase 6 — Learning engine
-
-Do not allow unconstrained self-modification.
-
-Use:
-1. experiment observation
-2. evidence threshold
-3. proposed rule update
-4. human/agent review
-5. versioned commit
-
-This preserves an auditable history of why the editor changes behavior.
-
-## Phase 7 — Scale
-
-Potential additions:
-- batch processing
-- auto-selection of the best raw clip from several takes
-- platform-specific variants
-- thumbnail/frame selection where relevant
-- analytics dashboards
-- automatic experiment assignment
-- winner/challenger policy for editing strategies
+`raw upload -> automated job -> A/B/C edits -> QC -> approved exports -> metrics ingest -> evidence-backed learning`

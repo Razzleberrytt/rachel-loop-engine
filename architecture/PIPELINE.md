@@ -1,77 +1,37 @@
 # Pipeline Architecture
 
-## Target user experience
+## Principle
 
-Rachel/Willie supplies one raw video. The system returns review-ready variants with an edit report.
+Rachel Loop Engine owns decisions; editor services execute them. Creative truth must not be trapped inside one vendor.
 
-## Logical pipeline
+## Layers
 
-1. **Ingest** — receive file or cloud URL; store asset metadata.
-2. **Transcribe** — word timestamps + speaker segments where useful.
-3. **Visual analysis** — scene/motion/reaction/action timeline.
-4. **Moment map** — label hook/context/payoff/dead-air/loop-bridge regions.
-5. **Planner** — choose structure and generate A/B/C edit decision lists (EDLs).
-6. **Editor adapter** — execute EDL in Descript or another NLE service.
-7. **Caption pass** — style and correct captions.
-8. **Audio pass** — dialogue level, noise cleanup, transition smoothing.
-9. **Loop pass** — engineer and verify seam for candidate C.
-10. **QC agent** — compare finished edit against rules and source intent.
-11. **Export** — create platform-ready files.
-12. **Analytics ingest** — capture post-performance metrics.
-13. **Learning layer** — compare experiments and promote repeatable rules.
+1. **Intake** — `SourceSpec` + stable `job_id`.
+2. **Analysis** — transcript, premise, moments, risks, hook/payoff candidates.
+3. **Planning** — Natural/Retention/Loop intent and loop viability.
+4. **Prompt composition** — merge versioned Rachel rules with runtime context.
+5. **Editor adapter** — import, agent edit, inspect project, publish.
+6. **QC** — deterministic manifest checks plus media-aware review.
+7. **Artifacts** — composition IDs, share URLs, durations, QC state.
+8. **Analytics** — observed post metrics.
+9. **Learning** — conservative evidence gate before permanent rule promotion.
 
-## System boundaries
+## State/retry model
 
-### GitHub repo
-Stores:
-- rules
-- prompts
-- code
-- configs
-- schemas
-- experiment results
-- anonymized metadata
+- Do not redo successful upstream stages merely because a later stage failed.
+- Persist external project/job/composition IDs as soon as they exist.
+- Resolve compositions from project inspection; never fabricate IDs.
+- Publish is per composition, so one failed variant does not block the others.
+- Loop is optional and may be downgraded/rejected independently.
 
-Does not store:
-- full raw videos
-- finished full-resolution videos
-- secrets/API keys
+## Service boundary
 
-### Media storage
-Use Google Drive, Dropbox, object storage, or the editor's project storage for video assets.
+`EditorTransport` is intentionally small:
 
-### Descript
-Initial execution engine for:
-- transcription
-- timeline editing
-- captions
-- reframing
-- audio cleanup
-- exports
+- `import_media`
+- `run_agent`
+- `wait`
+- `get_project`
+- `publish`
 
-Keep Descript behind an adapter so the planner is not permanently coupled to one editor.
-
-## Core intermediate representation
-
-Each variant should eventually compile into an Edit Decision List (EDL)-like JSON object:
-
-```json
-{
-  "variant": "C",
-  "segments": [
-    {"source_start": 12.2, "source_end": 14.8, "role": "hook"},
-    {"source_start": 2.1, "source_end": 9.7, "role": "context"}
-  ],
-  "captions": {"mode": "phrase"},
-  "loop": {"enabled": true, "type": "payoff_return"}
-}
-```
-
-This makes the creative plan portable across editing tools.
-
-## Reliability strategy
-
-- Every stage emits structured output.
-- Creative agents propose decisions; deterministic validators check schemas and hard rules.
-- Keep source timestamps for traceability.
-- Failed automation should degrade to a reviewable edit plan rather than silently exporting junk.
+This exactly captures what the current Descript-connected workflow needs while remaining mockable.

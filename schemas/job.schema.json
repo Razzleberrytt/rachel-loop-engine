@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rachel-loop-engine.local/schemas/job.schema.json",
+  "title": "Rachel Loop Engine Job",
+  "type": "object",
+  "required": ["job_id", "source"],
+  "properties": {
+    "job_id": {"type": "string", "minLength": 1},
+    "premise": {"type": "string"},
+    "status": {"enum": ["created", "analyzing", "planning", "editing", "qc", "exporting", "complete", "failed"]},
+    "source": {
+      "type": "object",
+      "required": ["uri", "duration_seconds"],
+      "properties": {
+        "uri": {"type": "string", "minLength": 1},
+        "duration_seconds": {"type": "number", "exclusiveMinimum": 0},
+        "filename": {"type": "string"},
+        "content_type": {"type": "string"},
+        "language": {"type": "string"}
+      }
+    }
+  }
+}

@@ -1,181 +1,53 @@
-# End-to-End Workflow
+# Rachel Loop Engine — End-to-End Workflow
 
-## Stage 0 — Intake
+## 0. Intake
 
-Input: one raw video, ideally the original phone file.
+Receive one raw source. Create a stable job ID and record URI/upload identity, duration, filename, language, and premise if known. Never store raw media in Git.
 
-Capture:
-- source filename / asset ID
-- source duration
-- orientation and resolution
-- platform target(s)
-- optional creator note
-- whether children/minors appear
+## 1. Understand the whole source
 
-Do not require Rachel to pre-trim the clip.
+Transcribe and inspect the entire clip before editing. Mark candidate moments as hook, context, payoff, reaction, support, dead-air, duplicate, loop-bridge, or risk. Preserve ambiguity rather than inventing a story.
 
-## Stage 1 — Understand before cutting
+## 2. Build three intents
 
-Transcribe the full clip and inspect visual events. Determine:
-- What is actually happening?
-- What is the emotional reason to watch?
-- Where is the strongest moment?
-- Is there a story, reaction, reveal, cute moment, joke, problem/solution, or transformation?
-- Does the raw recording already contain a natural loop opportunity?
+### A Natural
+Clean, clear, authentic. Minimal reorder. Remove recording artifacts and low-value pauses.
 
-Output a one-sentence premise.
+### B Retention
+Use the strongest truthful opening, denser pacing, and more structural compression. Reordering must remain materially truthful.
 
-## Stage 2 — Build a moment map
+### C Loop
+Start from the strongest story structure and attempt a natural reset using movement, sentence, audio, payoff-to-premise, or visual bridging. Reject the loop if the seam or meaning is bad.
 
-Mark timestamp ranges as one of:
-- HOOK
-- CONTEXT
-- PAYOFF
-- REACTION
-- SUPPORT
-- DEAD_AIR
-- DUPLICATE
-- LOOP_BRIDGE
-- RISK
+## 3. Execute in editor
 
-The moment map is the basis for all later decisions.
+For Descript, create `00 Raw`, preserve it, then create canonical A/B/C compositions. Use versioned prompts from the repo. Inspect the project after agent work and resolve real composition IDs by canonical name.
 
-## Stage 3 — Hook selection
+## 4. Polish
 
-Generate up to three hook candidates. Score each on:
-- immediate clarity
-- curiosity
-- emotional intensity
-- visual activity
-- connection to the payoff
-- authenticity
+- vertical safe framing
+- natural dialogue cleanup
+- readable phrase-based captions
+- restrained punch-ins/reframes
+- no generic CTA that weakens the ending
+- no unnecessary outro tail/fade/dead air
 
-Prefer an authentic high-value moment from later in the footage over a weak chronological opening.
+## 5. QC
 
-## Stage 4 — Structural edit
+Run deterministic plan checks and media-aware checks. For loop variants, replay final 2 seconds into first 2 seconds. A rejected loop does not block Natural/Retention.
 
-Choose the minimum runtime necessary to preserve the experience.
+## 6. Publish/export
 
-Typical structures:
+Publish only accepted compositions. Default target is 1080p, unlisted review output until posting is intentional. Persist project ID, composition IDs, output/share refs, durations, and QC state.
 
-### Natural story
-`hook -> context -> development -> payoff -> clean ending`
+## 7. Observe
 
-### Payoff-first
-`payoff glimpse -> context -> development -> payoff continuation -> loop/ending`
+Record platform metrics that actually exist. Do not infer replay/completion fields the platform did not provide.
 
-### Reaction-led
-`reaction -> cause -> escalation -> return to reaction`
+## 8. Learn
 
-### Seamless-loop story
-`opening phrase/action -> body -> bridge that naturally feeds opening`
+Compare comparable posts/variants. Promote a pattern only after it clears the evidence gate (default: at least 3 examples and median relative lift >= 8%) and does not damage authenticity/safety.
 
-Do not use a structure simply because it is trendy.
+## Recovery rule
 
-## Stage 5 — Tightening
-
-Remove or shorten:
-- dead air
-- accidental setup
-- repeated explanations
-- filler phrases that add no personality
-- long camera settling periods
-- empty tails after the payoff
-
-Preserve:
-- natural comedic timing
-- emotionally meaningful pauses
-- genuine reactions
-- context required to understand the moment
-
-## Stage 6 — Visual treatment
-
-Default visual treatment is restrained.
-
-Use punch-ins when they:
-- emphasize a reaction;
-- hide a jump cut;
-- redirect attention;
-- create controlled visual change during a long static beat.
-
-Avoid constant zooming.
-
-Reframe to keep the important subject/action visible in 9:16. Never crop out meaningful context for the sake of face centering.
-
-## Stage 7 — Captions
-
-Generate accurate captions and correct obvious transcription errors.
-
-Default:
-- phrase-based rather than giant word-by-word captions
-- high contrast
-- safe margins for platform UI
-- emphasis only on genuinely important words
-- avoid covering faces, hands, or the key action
-
-## Stage 8 — Audio
-
-- normalize dialogue
-- reduce distracting background noise conservatively
-- preserve natural room tone
-- avoid robotic over-processing
-- use music only when it helps; speech clarity wins
-- ensure the loop transition does not produce an audible click or ambience jump
-
-## Stage 9 — Loop engineering
-
-Evaluate loop options using `LOOP_PLAYBOOK.md`.
-
-A loop must pass:
-- semantic continuity
-- visual continuity
-- audio continuity
-- no obvious end-card cadence
-- no loss of payoff
-
-If no loop scores high enough, export a non-looping version.
-
-## Stage 10 — Variants
-
-When meaningful differences exist, create:
-
-### A — Natural
-Closest to authentic chronology and pacing.
-
-### B — Retention
-Tighter opening, more aggressive removal, stronger structural reorder where justified.
-
-### C — Loop
-Best loop-capable construction, even if its edit order differs from A/B.
-
-Do not create fake variants that differ only by a tiny cosmetic change.
-
-## Stage 11 — QC
-
-Run every final variant through `QUALITY_CONTROL.md`.
-
-## Stage 12 — Export
-
-Default:
-- 1080x1920
-- 9:16
-- 30 fps
-- H.264/AAC unless platform/tool requires otherwise
-- no watermark
-
-## Stage 13 — Feedback
-
-After posting, record:
-- platform
-- post date/time
-- video length
-- views
-- average watch time
-- average percentage viewed if available
-- completion rate if available
-- replay/loop proxy if available
-- likes/comments/shares/saves
-- follows attributable if available
-- qualitative comments
-
-Use performance to update experiments, not to rewrite canonical rules after one result.
+Retry only the failed stage. Import success must survive edit failure; edit success must survive publish failure; published variants must not be duplicated because another variant failed.
