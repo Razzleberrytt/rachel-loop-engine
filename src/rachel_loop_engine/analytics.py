@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
+from datetime import datetime
 from pathlib import Path
+import hashlib
 import json
 
 
@@ -41,6 +43,23 @@ class VideoMetrics:
 
 
 @dataclass(frozen=True)
+class EvidenceProvenance:
+    source_kind: str
+    source_name: str | None = None
+    source_sha256: str | None = None
+    extraction_method: str | None = None
+    extraction_confidence: float | None = None
+    source_captured_at: str | None = None
+    notes: str | None = None
+
+    def __post_init__(self) -> None:
+        if not self.source_kind.strip():
+            raise ValueError("source_kind is required")
+        if self.extraction_confidence is not None and not 0 <= self.extraction_confidence <= 1:
+            raise ValueError("extraction_confidence must be between 0 and 1")
+
+
+@dataclass(frozen=True)
 class PerformanceSnapshot:
     job_id: str
     variant: str
@@ -53,6 +72,10 @@ class PerformanceSnapshot:
     shares: int | None = None
     saves: int | None = None
     follows_attributed: int | None = None
+    post_timestamp: str | None = None
+    creative_fingerprint_id: str | None = None
+    creative_fingerprint: dict[str, object] | None = None
+    provenance: EvidenceProvenance | None = None
 
     def __post_init__(self) -> None:
         if not self.job_id.strip():
@@ -83,6 +106,17 @@ class PerformanceSnapshot:
             return None
         return self.shares * 1000 / self.metrics.views
 
+    @property
+    def post_age_seconds(self) -> float | None:
+        if not self.post_timestamp:
+            return None
+        try:
+            captured = _parse_iso(self.captured_at)
+            posted = _parse_iso(self.post_timestamp)
+        except ValueError:
+            return None
+        return max(0.0, (captured - posted).total_seconds())
+
     def to_record(self) -> dict[str, object]:
         record = asdict(self)
         record["derived"] = {
@@ -90,6 +124,7 @@ class PerformanceSnapshot:
             "retention_index": retention_index(self.metrics),
             "engagement_per_view": self.engagement_per_view,
             "shares_per_1000_views": self.shares_per_1000_views,
+            "post_age_seconds": self.post_age_seconds,
         }
         return record
 
@@ -141,3 +176,57 @@ def load_snapshots(path: str | Path) -> list[dict[str, object]]:
 def latest_snapshot(path: str | Path) -> dict[str, object] | None:
     snapshots = load_snapshots(path)
     return snapshots[-1] if snapshots else None
+
+
+def screenshot_provenance(
+    screenshot_path: str | Path,
+    *,
+    extraction_method: str = "vision_assisted",
+    extraction_confidence: float | None = None,
+    source_captured_at: str | None = None,
+    notes: str | None = None,
+) -> EvidenceProvenance:
+    path = Path(screenshot_path)
+    if not path.is_file():
+        raise FileNotFoundError(path)
+    return EvidenceProvenance(
+        source_kind="analytics_screenshot",
+        source_name=path.name,
+        source_sha256=file_sha256(path),
+        extraction_method=extraction_method,
+        extraction_confidence=extraction_confidence,
+        source_captured_at=source_captured_at,
+        notes=notes,
+    )
+
+
+def file_sha256(path: str | Path, chunk_size: int = 1024 * 1024) -> str:
+    digest = hashlib.sha256()
+    with Path(path).open("rb") as fh:
+        while True:
+            chunk = fh.read(chunk_size)
+            if not chunk:
+                break
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def performance_curve(
+    records: list[dict[str, object]],
+    *,
+    job_id: str,
+    variant: str,
+    platform: str,
+) -> list[dict[str, object]]:
+    matched = [
+        record
+        for record in records
+        if record.get("job_id") == job_id
+        and record.get("variant") == variant
+        and str(record.get("platform", "")).casefold() == platform.casefold()
+    ]
+    return sorted(matched, key=lambda record: str(record.get("captured_at", "")))
+
+
+def _parse_iso(value: str) -> datetime:
+    return datetime.fromisoformat(value.replace("Z", "+00:00"))
