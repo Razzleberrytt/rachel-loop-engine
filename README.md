@@ -1,20 +1,20 @@
 # Rachel Loop Engine
 
-A retention-first short-form video system for turning Rachel's raw vertical footage into polished, natural, replay-friendly social videos.
+A retention-first short-form video system for turning Rachel's raw vertical footage into polished, natural, replay-friendly social videos — and then learning from what actually happens after posting.
 
 ## One-line goal
 
-`private raw video -> understand -> reviewable EDL -> zero-credit A/B/C renders -> QC -> loop if earned -> learn`
+`private raw video -> understand -> reviewable EDL -> zero-credit A/B/C renders -> QC -> loop if earned -> post -> capture metrics -> learn`
 
-## v0.7 status — deterministic rendering is now the default
+## v0.8 status — the post-performance learning loop is now durable
 
-The creative brain remains Rachel-specific, but the mechanical editor is no longer allowed to become a credit bottleneck.
+The engine already separated creative reasoning from mechanical rendering in v0.7. Version 0.8 closes the next major gap: **real post analytics can now be captured as append-only evidence instead of living only in screenshots or chat history.**
 
 ### Default architecture
 
-`analysis -> timestamp/EDL decisions -> deterministic validation -> FFmpeg render -> QC -> analytics`
+`analysis -> timestamp/EDL decisions -> deterministic validation -> FFmpeg render -> QC -> post -> timestamped performance snapshots -> evidence gate`
 
-Descript is retained as an **optional adapter/review surface**, not the canonical renderer.
+Descript remains an **optional adapter/review surface**, not the canonical renderer.
 
 ### Implemented
 
@@ -31,7 +31,10 @@ Descript is retained as an **optional adapter/review surface**, not the canonica
 - local rerenders that require **no Descript AI-agent credits**
 - Descript import/agent/inspect/publish adapter remains available when deliberately wanted
 - structured media-aware QC and recommendation framework
-- analytics/learning foundation with conservative evidence gates
+- append-only performance snapshots with derived retention/engagement metrics
+- direct support for replay-heavy average percentage viewed above 100%
+- `rle record-metrics` with decimal or percent input (`2.15` or `215%`)
+- conservative evidence-promotion gates so one viral post does not become fake certainty
 - Python 3.11/3.12 CI
 - live real-footage intake and deterministic render proof
 
@@ -47,18 +50,23 @@ Descript is retained as an **optional adapter/review surface**, not the canonica
 8. One viral video is a hypothesis, not a permanent rule.
 9. **AI may choose timestamps; AI does not need to execute timestamps.**
 10. Mechanical rerenders should be deterministic and cheap.
+11. Analytics history is append-only; never erase an earlier snapshot with a later one.
+12. Replay-heavy APV may legitimately exceed 100%; never cap it at 1.0.
 
-## Real-footage calibration result
+## Real-footage calibration
 
-A real Rachel clip was uploaded directly in ChatGPT, staged without using public GitHub, and successfully imported into Descript. Descript created `00 Raw`, `A Natural`, `B Retention`, and `C Loop`, but its AI agent then stopped because the account ran out of AI credits.
+The first real Rachel footage proved the private intake path and exposed editor-agent credits as the wrong execution dependency. The architecture pivoted to deterministic FFmpeg rendering in v0.7.
 
-That failure exposed the correct architecture: the same source was rendered outside the editor agent using a deterministic EDL and FFmpeg. The loop variant used a cyclic timeline rotation so the replay boundary reconnects the original source at the chosen loop anchor. The output passed a full decode check.
+The current calibration clip is tracked as `RLE-2026-09-05-001`: a ~5.87 second curiosity-led baby tracking clip with a strong hidden visual restart. Its seam and text timing passed creative QC and the `C Loop` cut is the keeper. Performance evidence is intentionally still marked pending until platform analytics are captured.
 
-See `docs/ZERO_CREDIT_RENDERING.md`.
+See:
+- `docs/ZERO_CREDIT_RENDERING.md`
+- `experiments/experiment-log.md`
+- `analytics/metrics-schema.md`
 
 ## Private-media intake
 
-Chat attachments can now be copied into the Rachel Loop Engine intake flow and staged through connector-managed media transport. Family footage must never be put in a public Git repository merely to make it fetchable.
+Chat attachments can be copied into the Rachel Loop Engine intake flow and staged through connector-managed media transport. Family footage must never be put in a public Git repository merely to make it fetchable.
 
 Git stores code, rules, plans, schemas, experiment metadata, and anonymized learnings — **not raw family media or full-resolution exports**.
 
@@ -73,6 +81,7 @@ Git stores code, rules, plans, schemas, experiment metadata, and anonymized lear
 - C Loop only when loop/truthfulness QC passes
 - deterministic local review renders by default
 - concise recommendation and experiment metadata
+- timestamped analytics snapshots after posting
 
 ## Quick start
 
@@ -93,6 +102,15 @@ rle plan-local job.json \
 
 # Render without editor AI credits.
 rle render-local job.json local-plans/loop.json ./raw.mp4 --out ./C_Loop.mp4
+
+# After posting, append analytics without overwriting earlier snapshots.
+rle record-metrics job.json \
+  --platform youtube_shorts \
+  --variant "C Loop" \
+  --views 2500 \
+  --apv 215% \
+  --likes 100 \
+  --shares 25
 ```
 
 ## Key docs
@@ -106,7 +124,8 @@ rle render-local job.json local-plans/loop.json ./raw.mp4 --out ./C_Loop.mp4
 - `docs/MEDIA_QC.md` — structured finished-video reviewer
 - `docs/FULL_TREATMENT.md` — one-input transaction design
 - `docs/MILESTONES.md` — current implementation gates
+- `analytics/metrics-schema.md` — append-only post-performance schema
 
 ## Next highest-ROI gate
 
-Run several real Rachel clips through the deterministic path, record actual performance, and use those results to improve timestamp selection and Rachel-specific rules. Descript-agent usage is no longer a prerequisite for that learning loop.
+Collect multiple timestamped performance snapshots from real Rachel posts, starting with `RLE-2026-09-05-001`, then compare repeated loop/non-loop patterns before promoting any hypothesis into a permanent Rachel rule.

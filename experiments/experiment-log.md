@@ -25,6 +25,29 @@ Append experiments; do not rewrite history.
 
 ---
 
+## Active experiments
+
+### EXP-2026-001 — Source-contiguous baby tracking loop
+- Date: 2026-09-05
+- Source video: `RLE-2026-09-05-001`
+- Platform: pending/posted short-form distribution
+- Hypothesis: A strong source-contiguous visual restart on a very short curiosity clip can drive meaningful replay behavior without making the edit feel artificial.
+- Control / comparison: No matched control yet; treat this as calibration evidence, not a causal win.
+- Variant details: `C Loop` keeper; current uploaded cut preserved rather than recut for marginal hook gains.
+- Hook type: curiosity-led visual action
+- Loop type: hidden/source-contiguous visual restart
+- Video duration: 5.866667 seconds
+- Metrics after 24h: pending
+- Metrics after 72h: pending
+- Final metrics: pending
+- Result: creative QC pass; performance result pending
+- Confidence: low for causal performance inference; high for seam-quality assessment
+- Confounders: no matched A/B control; platform distribution and audience mix unknown
+- Decision: repeat
+- Notes: Visual seam assessed approximately 9/10. Preserve current seam and text timing. New v0.8 snapshot capture should be used for every analytics refresh so early and mature performance are both retained.
+
+---
+
 ## Initial hypothesis backlog
 
 ### H-001 — Hidden restart
