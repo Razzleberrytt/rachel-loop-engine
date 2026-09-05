@@ -6,101 +6,59 @@ Create a restart that feels natural enough that a viewer may continue watching w
 
 ## Loop types
 
-### 1. Sentence loop
-The final words syntactically or conceptually feed the opening words.
-
-Best when:
-- speech is the main content;
-- a sentence can be split without changing meaning;
-- room tone matches.
-
-Risk: sounding grammatically manipulated.
-
-### 2. Visual match loop
-The final frame/action resembles or continues the opening frame/action.
-
-Best when:
-- there is repeated motion;
-- camera angle is stable;
-- a hand/body/camera movement can hide the seam.
-
-Risk: visible position or lighting jump.
-
-### 3. Motion-cut loop
-Cut during meaningful movement so the eye has less time to inspect continuity.
-
-Examples:
-- turning the camera
-- moving a hand across frame
-- walking past camera
-- quick head turn
-
-Risk: audio can still reveal the seam.
-
-### 4. Payoff-return loop
-Open with a high-value moment; the end provides the cause/setup that logically sends the viewer back to the opening.
-
-Best when the raw video has a strong reaction/reveal later than the setup.
-
-Risk: spoiling too much in the opening.
-
-### 5. Audio bridge loop
-The ending audio cadence or ambience is designed to flow into the opening sound.
-
-Risk: background-noise discontinuity.
-
-### 6. Interrupted completion loop
-The video ends at a point where the viewer expects one more semantic beat, and the opening supplies it.
-
-Use carefully. It must not feel like content was dishonestly withheld.
-
-### 7. Cyclical action loop
-The subject performs an action that naturally repeats.
-
-Best for visual/cute/family moments with little narrative dependency.
+1. **Sentence loop** — final words feed the opening words without changing meaning.
+2. **Visual match loop** — end and opening composition/motion visually match.
+3. **Motion-cut loop** — cut during meaningful movement so the eye has less time to inspect continuity.
+4. **Payoff-return loop** — open with a genuine payoff glimpse; ending supplies cause/context that sends the viewer back.
+5. **Audio bridge loop** — ending ambience/cadence flows into opening audio.
+6. **Interrupted completion loop** — opening truthfully supplies the semantic beat implied by the ending; use carefully.
+7. **Cyclical action loop** — naturally repeating action, especially useful for cute/family moments.
+8. **Source-contiguous rotation** — rotate the retained timeline around an original source boundary so replay reconstructs adjacent source moments.
 
 ## Loop scoring
 
-Score each candidate 0–5:
-
-- semantic continuity (S)
-- visual continuity (V)
-- audio continuity (A)
-- opening strength (H)
-- payoff preservation (P)
-- detectability resistance (D)
-
-Weighted loop score:
+Manual creative score (0–5 each): semantic continuity, visual continuity, audio continuity, opening strength, payoff preservation, detectability resistance.
 
 `0.20S + 0.15V + 0.15A + 0.20H + 0.20P + 0.10D`
 
-### Decision bands
+- 4.2–5.0 strong
+- 3.6–4.19 viable with QC
+- 3.0–3.59 experimental
+- below 3.0 reject
 
-- **4.2–5.0:** strong loop candidate
-- **3.6–4.19:** viable with QC
-- **3.0–3.59:** experimental only
-- **below 3.0:** do not force the loop
+## Seam Hunter (v0.9)
 
-## Seam QC
+Automatic source-contiguous anchor ranking uses:
+- adjacent-frame continuity;
+- opening-motion usefulness;
+- local audio-level continuity when audio exists.
 
-Review at least three consecutive cycles:
+The highest raw score is **not automatically valid**. The anchor must still lie in retained footage after head trims/removals. `treat-local` enforces that gate.
 
-`...end -> start -> ...end -> start...`
+A secondary visual-match search compares start/end frames and local motion energy. These non-contiguous loops are experimental and require finished-render QC before posting.
+
+## Three-cycle QC
+
+Review at least three consecutive cycles. `rle hunt-seams --preview-dir ...` and `treat-local` can create three-cycle previews.
 
 Check:
-- Does the eye detect a spatial jump?
-- Does background noise pop?
-- Does speech cadence reset?
-- Does Rachel visibly teleport position?
-- Is the payoff still satisfying?
-- Does the viewer understand the content on the first pass?
+- spatial jump or subject teleportation;
+- lighting/color reset;
+- audio pop or ambience reset;
+- speech cadence reset;
+- text timing reset;
+- payoff still satisfying;
+- first-pass comprehension intact.
 
-## Do-not-loop conditions
+Mechanical QC additionally checks decode, duration, dimensions, FPS, audio-stream expectations, black frames, and long freeze/static intervals.
 
-Do not force a loop if:
+## Do not force a loop when
+
 - it changes the meaning of a statement;
 - it makes a child/family interaction misleading;
 - the best ending is emotionally final;
 - the loop requires distracting effects;
 - the opening becomes weaker;
 - the audience would be confused without missing context.
+
+A high Seam Hunter score is a candidate-generation signal, never permission to violate truthfulness or story quality.

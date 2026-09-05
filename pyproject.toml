@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "rachel-loop-engine"
-version = "0.8.0"
-description = "Retention-first short-form video planning, deterministic rendering, post-performance capture, looping, QC, orchestration, and learning engine"
+version = "0.9.0"
+description = "Retention-first short-form video planning, seam intelligence, deterministic rendering, QC, analytics, and learning engine"
 requires-python = ">=3.11"
 dependencies = []
 

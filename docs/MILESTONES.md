@@ -7,22 +7,28 @@ Versioned Rachel-specific creative rules, retention rules, loop playbook, prompt
 Durable jobs/manifests, validation, transport boundary, Descript coordinator, mock transport, CLI, CI, retries/idempotency.
 
 ## M2.5 — Live media bridge ✅
-Synthetic URL import was verified first. The first real calibration then verified ChatGPT attachment → staging/connector transport → Descript import → `00 Raw`. Public Git transport is not required and must not be used for family footage.
+Chat attachment -> private staging/connector transport -> editing intake is proven. Raw family footage must not use public Git transport.
 
-## M3 — Automatic Multi-variant Production ✅ / 🟡 calibration continues
-The first real clip produced `A Natural`, `B Retention`, and `C Loop` in Descript. The agent then hit an AI-credit ceiling, proving that mechanical execution must not depend on editor-agent credits.
+## M3 — Multi-variant Production ✅ / 🟡 calibration continues
+Core A Natural / B Retention / C Loop and deterministic rendering are operational. v0.9 adds hypothesis-driven compression, payoff-first, alternate-hook, no-text, and visual-match-loop variants only when meaningful inputs exist.
 
 ## M3.5 — One-input Full Treatment ✅
-The orchestration contract sequences source → variants → QC → render → recommendation and preserves hard failure gates.
+The orchestration contract sequences source -> variants -> QC -> render -> recommendation and preserves hard failure gates.
 
 ## M3.75 — Zero-credit deterministic renderer ✅
-Version 0.7 adds portable EDLs, deterministic retained-range planning, source-contiguous cyclic loop rotation, FFmpeg execution, and CLI commands for planning/rendering without Descript AI-agent credits. Descript is optional rather than canonical.
+Portable EDLs, source-contiguous rotation, FFmpeg execution, and credit-free rerenders are canonical.
+
+## M3.9 — Media hardening + Seam Hunter ✅
+ffprobe-based stream detection handles silent media. Seam Hunter ranks rotation anchors and visual-match candidates. Three-cycle preview generation is available.
 
 ## M4 — Analytics Learning Loop ✅ capture / 🟡 evidence accumulation
-Version 0.8 adds append-only timestamped performance snapshots, direct support for average percentage viewed above 100%, derived retention/engagement metrics, and `rle record-metrics`. The machinery is complete enough to preserve real post evidence without screenshot-only drift. Repeated real-post data is still required before promoting creative hypotheses into permanent Rachel rules.
+Append-only snapshots preserve APV above 100%. v0.9 adds screenshot provenance, post-age curves, and creative fingerprints.
 
-## M4.5 — Comparative calibration 🟡
-Collect multiple comparable Rachel posts and compute repeated loop/non-loop or edit-pattern lift with the existing conservative evidence gate. Prefer matched or near-matched content when possible; do not call one viral result causal proof.
+## M4.5 — Comparative calibration ✅ machinery / 🟡 sample accumulation
+Matched-pair comparison now scores comparability and calculates repeated relative lift before the evidence gate. Real repeated Rachel post data is still required for validated lessons.
 
-## M5 — One-button intake 🟡
-Direct chat attachment intake has been proven. Remaining work is packaging intake → analysis → plan → local A/B/C → QC → returned outputs behind one command/UI action with cleanup and durable job state.
+## M5 — One-button local treatment ✅ execution / 🟡 creative calibration
+`treat-local` now probes -> hunts seams -> plans hypotheses -> renders -> mechanically QCs -> fingerprints -> ranks -> creates loop preview -> generates fallback social copy -> registers the experiment. Remaining work is improving creative timestamp selection with accumulated Rachel-specific evidence, not basic orchestration.
+
+## M6 — Rachel-specific learned policy 🟡
+Promote only repeatedly validated findings from matched comparisons into permanent timestamp-selection, hook, caption, runtime, and loop priors.

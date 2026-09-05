@@ -6,7 +6,16 @@ from enum import Enum
 from typing import Any, Literal
 
 Role = Literal["hook", "context", "payoff", "reaction", "support", "dead_air", "duplicate", "loop_bridge", "risk"]
-VariantKind = Literal["natural", "retention", "loop"]
+VariantKind = Literal[
+    "natural",
+    "retention",
+    "loop",
+    "compression",
+    "payoff_first",
+    "alternate_hook",
+    "minimal_text",
+    "match_loop",
+]
 
 class JobStatus(str, Enum):
     CREATED = "created"
