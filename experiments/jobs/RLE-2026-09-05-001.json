@@ -1,0 +1,34 @@
+{
+  "job_id": "RLE-2026-09-05-001",
+  "source": {
+    "uri": "chat-attachment-private",
+    "duration_seconds": 5.866667,
+    "filename": "private-calibration-clip.mp4",
+    "content_type": "video/mp4",
+    "language": "en"
+  },
+  "premise": "Baby tracks a target/object; curiosity-led short with an intentionally seamless visual loop.",
+  "variants": [
+    {
+      "name": "C Loop",
+      "status": "keeper",
+      "notes": "Uploaded cut already has a strong visual seam. Protect the loop rather than recutting for marginal hook gains."
+    }
+  ],
+  "status": "review_ready",
+  "artifacts": [],
+  "created_at": "2026-09-05T01:18:00-04:00",
+  "updated_at": "2026-09-05T01:18:00-04:00",
+  "metadata": {
+    "source_kind": "edited calibration clip",
+    "video_dimensions": "512x910",
+    "fps": 30,
+    "audio_track_present": false,
+    "visual_loop_qc": "pass",
+    "text_timing_qc": "pass",
+    "runtime_fit": "pass",
+    "hook_assessment": "good but not maximal",
+    "loop_assessment": "strong; approximately 9/10 visual seam",
+    "recommendation": "Keep current seam and text timing. Only consider a uniform crop if it does not disturb loop continuity."
+  }
+}
