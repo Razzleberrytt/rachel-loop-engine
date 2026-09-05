@@ -6,17 +6,20 @@ Versioned Rachel-specific creative rules, retention rules, loop playbook, prompt
 ## M2 — Executable Orchestration ✅
 Durable jobs/manifests, validation, transport boundary, Descript coordinator, mock transport, CLI, CI, retries/idempotency.
 
-## M2.5 — Live Descript Bridge ✅ URL path
-Synthetic live test verified URL import → wait → agent mutation → A/B/C → inspection/UUID resolution → 1080p unlisted render → structured QC. Direct chat-attachment bytes remain issue #1; private Drive/Dropbox/direct-access URLs are the working intake path.
+## M2.5 — Live media bridge ✅
+Synthetic URL import was verified first. The first real calibration then verified ChatGPT attachment → staging/connector transport → Descript import → `00 Raw`. Public Git transport is not required and must not be used for family footage.
 
-## M3 — Automatic Multi-variant Production ✅ / 🟡 real-content calibration
-A/B/C creation, real-ID discovery, media-aware QC, persisted reviews, recommendation, and mutation guard are implemented. Real Rachel footage remains the calibration gate.
+## M3 — Automatic Multi-variant Production ✅ / 🟡 calibration continues
+The first real clip produced `A Natural`, `B Retention`, and `C Loop` in Descript. The agent then hit an AI-credit ceiling, proving that mechanical execution must not depend on editor-agent credits.
 
 ## M3.5 — One-input Full Treatment ✅
-`full_treatment()` sequences create/reuse → A/B/C → media-aware QC → reject failures → render only passing variants → persist recommendation/status. No passing variants means no renders.
+The orchestration contract sequences source → variants → QC → render → recommendation and preserves hard failure gates.
+
+## M3.75 — Zero-credit deterministic renderer ✅
+Version 0.7 adds portable EDLs, deterministic retained-range planning, source-contiguous cyclic loop rotation, FFmpeg execution, and CLI commands for planning/rendering without Descript AI-agent credits. Descript is optional rather than canonical.
 
 ## M4 — Analytics Learning Loop 🟡 foundation
 Metrics normalization, relative lift, and conservative evidence promotion exist; real post data is still needed.
 
-## M5 — Drop-folder / one-button intake
-A private raw video landing in the intake location creates a job automatically and returns finished outputs plus a concise review card.
+## M5 — One-button intake 🟡
+Direct chat attachment intake has been proven. Remaining work is packaging intake → analysis → plan → local A/B/C → QC → returned outputs behind one command/UI action with cleanup and durable job state.

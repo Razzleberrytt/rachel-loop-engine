@@ -4,11 +4,26 @@ import argparse
 import json
 import uuid
 from dataclasses import asdict
+from pathlib import Path
 
+from .adapters.ffmpeg import FfmpegAdapter
+from .edl import dump_plan, load_plan
 from .manifest import dump_job, load_job
 from .models import SourceSpec, VideoJob
 from .pipeline import RachelLoopPipeline
+from .planner import build_zero_credit_variants
 from .review import render_review_card, reviews_from_job_artifacts
+
+
+def _time_range(value: str) -> tuple[float, float]:
+    try:
+        left, right = value.split(":", 1)
+        start, end = float(left), float(right)
+    except Exception as exc:
+        raise argparse.ArgumentTypeError("range must be START:END in seconds") from exc
+    if start < 0 or end <= start:
+        raise argparse.ArgumentTypeError("range must satisfy 0 <= START < END")
+    return start, end
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -29,6 +44,21 @@ def build_parser() -> argparse.ArgumentParser:
 
     card = sub.add_parser("review-card", help="render media-aware QC stored in a completed job")
     card.add_argument("manifest")
+
+    plan = sub.add_parser("plan-local", help="build deterministic A/B/C EDLs without editor AI credits")
+    plan.add_argument("manifest")
+    plan.add_argument("--remove", type=_time_range, action="append", default=[], metavar="START:END")
+    plan.add_argument("--head-trim", type=float, default=0.0)
+    plan.add_argument("--loop-anchor", type=float)
+    plan.add_argument("--out-dir", default="local-plans")
+
+    render = sub.add_parser("render-local", help="render one EDL with FFmpeg; no editor AI credits")
+    render.add_argument("manifest")
+    render.add_argument("plan")
+    render.add_argument("source_path")
+    render.add_argument("--out")
+    render.add_argument("--preset", default="veryfast")
+    render.add_argument("--crf", type=int, default=18)
     return p
 
 
@@ -53,6 +83,33 @@ def main(argv: list[str] | None = None) -> int:
             print("No media-aware reviews are stored in this job.")
             return 1
         print(render_review_card(reviews), end="")
+        return 0
+    if args.command == "plan-local":
+        plans = build_zero_credit_variants(
+            job.source_duration,
+            remove_ranges=args.remove,
+            retention_head_trim=args.head_trim,
+            loop_anchor=args.loop_anchor,
+        )
+        out_dir = Path(args.out_dir)
+        written = {
+            kind: str(dump_plan(plan, out_dir / f"{kind}.json"))
+            for kind, plan in plans.items()
+        }
+        print(json.dumps(written, indent=2))
+        return 0
+    if args.command == "render-local":
+        plan = load_plan(args.plan)
+        output = Path(args.out) if args.out else Path(plan.output_name)
+        ref = FfmpegAdapter().render(
+            args.source_path,
+            output,
+            plan,
+            source_duration=job.source_duration,
+            preset=args.preset,
+            crf=args.crf,
+        )
+        print(json.dumps(asdict(ref), indent=2))
         return 0
 
     state = RachelLoopPipeline().dry_run(job)

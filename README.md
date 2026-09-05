@@ -4,29 +4,36 @@ A retention-first short-form video system for turning Rachel's raw vertical foot
 
 ## One-line goal
 
-`private raw video -> understand -> A/B/C edits -> QC -> loop if earned -> review renders -> learn`
+`private raw video -> understand -> reviewable EDL -> zero-credit A/B/C renders -> QC -> loop if earned -> learn`
 
-## v0.6 status
+## v0.7 status — deterministic rendering is now the default
 
-The repository now contains the creative brain **and** a restart-safe one-input orchestration primitive. The core connected Descript path has been smoke-tested live with synthetic media.
+The creative brain remains Rachel-specific, but the mechanical editor is no longer allowed to become a credit bottleneck.
+
+### Default architecture
+
+`analysis -> timestamp/EDL decisions -> deterministic validation -> FFmpeg render -> QC -> analytics`
+
+Descript is retained as an **optional adapter/review surface**, not the canonical renderer.
 
 ### Implemented
 
 - Rachel-specific style, retention, loop, and truthfulness rules
 - durable job/variant/artifact/QC manifests
-- Descript import → async wait → agent → inspect → publish adapter
-- canonical `00 Raw`, `A Natural`, `B Retention`, `C Loop`
-- actual composition-ID discovery instead of guessing
-- idempotent resume behavior for projects, variants, and renders
-- structured media-aware QC with fail-closed JSON parsing
-- QC mutation fingerprint guard
-- automatic strongest-passing-variant recommendation
-- persisted `rle review-card job.json`
-- `full_treatment()` with **QC before render**
-- render only passing variants; no passing variant means no render
+- portable deterministic edit-decision lists (`LocalEditPlan` / `Segment`)
+- deterministic A Natural / B Retention / C Loop planning
+- removal-range merging and auditable retained-source intervals
+- cyclic timeline rotation around a loop anchor
+- hard `loop_seam_is_source_contiguous()` QC for rotation loops
+- FFmpeg execution through shell-free argv commands
+- 9:16 scale/crop, 30 fps normalization, H.264/AAC export, loudness normalization
+- `rle plan-local` and `rle render-local`
+- local rerenders that require **no Descript AI-agent credits**
+- Descript import/agent/inspect/publish adapter remains available when deliberately wanted
+- structured media-aware QC and recommendation framework
 - analytics/learning foundation with conservative evidence gates
 - Python 3.11/3.12 CI
-- live synthetic verification of URL import, A/B/C creation, inspection, render, and QC contract
+- live real-footage intake and deterministic render proof
 
 ## Creative constitution
 
@@ -38,23 +45,34 @@ The repository now contains the creative brain **and** a restart-safe one-input 
 6. Failed QC cannot be overruled by a flashy/high overall score.
 7. Rachel-specific evidence outranks generic social-media folklore.
 8. One viral video is a hypothesis, not a permanent rule.
+9. **AI may choose timestamps; AI does not need to execute timestamps.**
+10. Mechanical rerenders should be deterministic and cheap.
 
-## Current private-media intake
+## Real-footage calibration result
 
-For Rachel's real footage, use a **private Drive/Dropbox/direct-access URL** supported by Descript. Direct chat-attachment upload is tracked in issue #1: Descript's signed upload handshake works, but this execution environment cannot perform the required external byte `PUT`.
+A real Rachel clip was uploaded directly in ChatGPT, staged without using public GitHub, and successfully imported into Descript. Descript created `00 Raw`, `A Natural`, `B Retention`, and `C Loop`, but its AI agent then stopped because the account ran out of AI credits.
 
-**Never use a public Git repository as transport for Rachel/family footage.**
+That failure exposed the correct architecture: the same source was rendered outside the editor agent using a deterministic EDL and FFmpeg. The loop variant used a cyclic timeline rotation so the replay boundary reconnects the original source at the chosen loop anchor. The output passed a full decode check.
+
+See `docs/ZERO_CREDIT_RENDERING.md`.
+
+## Private-media intake
+
+Chat attachments can now be copied into the Rachel Loop Engine intake flow and staged through connector-managed media transport. Family footage must never be put in a public Git repository merely to make it fetchable.
+
+Git stores code, rules, plans, schemas, experiment metadata, and anonymized learnings — **not raw family media or full-resolution exports**.
 
 ## Default deliverables
 
 - 9:16, 1080x1920, 30 fps unless source constraints require otherwise
-- natural dialogue cleanup
-- readable phrase-based captions
+- natural dialogue/laughter preserved
+- conservative loudness cleanup
+- captions only when they improve comprehension rather than clutter the moment
 - A Natural
 - B Retention
-- C Loop only when it passes loop/truthfulness QC
-- unlisted review renders before intentional social posting
-- concise review card + recommendation
+- C Loop only when loop/truthfulness QC passes
+- deterministic local review renders by default
+- concise recommendation and experiment metadata
 
 ## Quick start
 
@@ -64,9 +82,17 @@ source .venv/bin/activate  # Windows: .venv\\Scripts\\activate
 pip install -e ".[dev]"
 pytest
 
-rle new-job "https://example.com/private-source.mp4" --duration 32.5 --premise "family reaction" --out job.json
-rle dry-run job.json
-rle review-card job.json
+rle new-job "https://example.com/private-source.mp4" --duration 37.97 --premise "family reaction" --out job.json
+
+# Create auditable local A/B/C plans. These timestamps are examples.
+rle plan-local job.json \
+  --remove 12.15:19.80 \
+  --head-trim 1.70 \
+  --loop-anchor 31.00 \
+  --out-dir local-plans
+
+# Render without editor AI credits.
+rle render-local job.json local-plans/loop.json ./raw.mp4 --out ./C_Loop.mp4
 ```
 
 ## Key docs
@@ -75,11 +101,12 @@ rle review-card job.json
 - `RACHEL_STYLE.md` — Rachel-specific editing voice
 - `LOOP_PLAYBOOK.md` — loop selection/construction
 - `QUALITY_CONTROL.md` — creative QC
-- `docs/LIVE_INTEGRATION_REPORT.md` — real connector validation
+- `docs/ZERO_CREDIT_RENDERING.md` — default deterministic execution architecture
+- `docs/LIVE_INTEGRATION_REPORT.md` — connector validation
 - `docs/MEDIA_QC.md` — structured finished-video reviewer
-- `docs/FULL_TREATMENT.md` — canonical one-input transaction
+- `docs/FULL_TREATMENT.md` — one-input transaction design
 - `docs/MILESTONES.md` — current implementation gates
 
 ## Next highest-ROI gate
 
-Run issue #2: one **real Rachel clip from a private supported URL** through `full_treatment()`, inspect the actual A/B/C behavior, and calibrate prompts/style from evidence.
+Run several real Rachel clips through the deterministic path, record actual performance, and use those results to improve timestamp selection and Rachel-specific rules. Descript-agent usage is no longer a prerequisite for that learning loop.
