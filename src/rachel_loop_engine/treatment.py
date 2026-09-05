@@ -10,7 +10,7 @@ from .fingerprint import CreativeFingerprint, fingerprint_from_plan
 from .local_workflow import LocalTreatmentResult, LocalWorkflowRunner
 from .media import MediaInfo, MediaProbe
 from .models import VideoJob
-from .planner import build_hypothesis_variants, build_match_loop_plan
+from .planner import build_hypothesis_variants, build_match_loop_plan, retained_segments
 from .seam_hunter import MatchSeamCandidate, SeamCandidate, SeamHunter
 from .social import SocialCopy, fallback_social_copy
 
@@ -96,11 +96,23 @@ class OneButtonTreatmentRunner:
                 duration_seconds=duration,
                 fps=media.fps or 30,
                 has_audio=media.has_audio,
-                top_n=5,
+                top_n=8,
             )
-            if seam_candidates and seam_candidates[0].score >= config.minimum_rotation_score:
-                loop_anchor = seam_candidates[0].anchor_seconds
-                loop_score = seam_candidates[0].score
+            retained = retained_segments(
+                duration,
+                config.remove_ranges,
+                head_trim=config.retention_head_trim,
+            )
+            viable = [
+                candidate for candidate in seam_candidates
+                if candidate.score >= config.minimum_rotation_score
+                and any(seg.source_start <= candidate.anchor_seconds <= seg.source_end for seg in retained)
+            ]
+            if viable:
+                loop_anchor = viable[0].anchor_seconds
+                loop_score = viable[0].score
+            elif seam_candidates:
+                warnings.append("Seam Hunter found candidates, but none survived the retained-footage gate.")
         elif loop_anchor is not None:
             loop_score = 100.0
 
@@ -180,6 +192,7 @@ class OneButtonTreatmentRunner:
         job.metadata["recommended_local_variant"] = recommended
         job.metadata["creative_fingerprints"] = {kind: fp.to_record() for kind, fp in fingerprints.items()}
         job.metadata["analytics_status"] = "performance_pending"
+        job.metadata["last_local_treatment_report"] = str(output_dir / "treatment-report.json")
         job.touch()
 
         report_path = output_dir / "treatment-report.json"
