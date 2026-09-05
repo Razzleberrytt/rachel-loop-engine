@@ -4,25 +4,34 @@ A retention-first short-form video system for turning Rachel's raw vertical foot
 
 ## One-line goal
 
-`raw video -> understand -> restructure -> polish -> loop if earned -> QC -> export -> learn`
+`private raw video -> understand -> A/B/C edits -> loop if earned -> QC -> review renders -> learn`
 
-## What v0.3 adds
+## v0.4 status
 
-The repository is no longer only an editing playbook. It now has an executable orchestration foundation:
+This is now more than an editing playbook. The repository contains an executable, restart-safe orchestration foundation and its core Descript path has been smoke-tested live with synthetic media.
 
+### Implemented
+
+- Rachel-specific creative constitution and style rules
+- retention + loop playbooks
 - durable source/job/variant/artifact/QC models
-- JSON job manifests
+- complete JSON job manifests
 - deterministic plan validation
 - transport-neutral editor interface
-- Descript coordinator for import → agent edit → wait → inspect → publish
-- named A/B/C composition workflow
+- Descript import → wait → agent → inspect → publish coordinator
+- canonical compositions:
+  - `00 Raw`
+  - `A Natural`
+  - `B Retention`
+  - `C Loop`
+- real composition-ID discovery instead of guessing
+- idempotent resume behavior that reuses existing projects/variants/renders
 - mock Descript transport for offline tests
-- prompt composition
 - CLI (`rle`)
 - machine-readable job schema
-- integration/runbook docs
 - conservative analytics-learning foundation
-- CI on Python 3.11 and 3.12
+- Python 3.11/3.12 CI
+- live URL-based Descript integration verification
 
 ## Creative constitution
 
@@ -43,10 +52,10 @@ The repository is no longer only an editing playbook. It now has an executable o
 - captions enabled
 - natural dialogue cleanup
 - no forced CTA that harms the ending
-- variants when meaningfully distinct:
-  - A — Natural
-  - B — Retention
-  - C — Loop
+- meaningful variants only:
+  - **A — Natural**
+  - **B — Retention**
+  - **C — Loop**
 
 ## Quick start
 
@@ -56,25 +65,37 @@ source .venv/bin/activate  # Windows: .venv\\Scripts\\activate
 pip install -e ".[dev]"
 pytest
 
-rle new-job "https://example.com/raw.mp4" --duration 32.5 --premise "family reaction" --out job.json
+rle new-job "https://example.com/private-source.mp4" --duration 32.5 --premise "family reaction" --out job.json
 rle dry-run job.json
 ```
 
-## Architecture
+## Live integration status
 
-The creative brain is service-independent. `DescriptAdapter` coordinates the editing workflow but receives an `EditorTransport` implementation. In ChatGPT, a bridge can map that transport to the connected Descript tools. Tests use a deterministic mock. A future editor can implement the same transport boundary.
+The URL-based connected Descript path has been verified end-to-end using synthetic media:
 
-See:
+`URL import -> async wait -> 00 Raw -> agent -> A/B/C -> inspect -> UUID resolution -> 1080p unlisted render`
 
-- `WORKFLOW.md` — creative operating procedure
-- `RACHEL_STYLE.md` — Rachel-specific style
-- `LOOP_PLAYBOOK.md` — loop strategies
-- `QUALITY_CONTROL.md` — creative QC
-- `docs/DESCRIPT_INTEGRATION.md` — live adapter contract
-- `docs/RUNBOOK.md` — operational failure/retry rules
-- `docs/MILESTONES.md` — implementation state
+Direct chat-attachment upload is not yet end-to-end in this execution environment: Descript returns the correct signed upload slot, but the current container cannot perform the external byte `PUT`. For Rachel's private footage, use a supported private Drive/Dropbox/direct-access URL until that byte bridge is added.
+
+**Never put private Rachel/family raw footage in this Git repository.**
+
+## Repository map
+
+- `AGENTS.md` — AI-agent non-negotiables
+- `WORKFLOW.md` — end-to-end operating procedure
+- `RACHEL_STYLE.md` — Rachel-specific editing voice
+- `RETENTION_RULES.md` — retention heuristics
+- `LOOP_PLAYBOOK.md` — loop construction/selection
+- `QUALITY_CONTROL.md` — pre-render QC
+- `architecture/PIPELINE.md` — technical architecture
+- `prompts/` — versioned editor prompts
+- `config/` — machine-readable defaults/learning gates
+- `analytics/` — measurement definitions and learned rules
+- `experiments/` — hypotheses and promoted winners
+- `docs/LIVE_INTEGRATION_REPORT.md` — real connector validation
 - `src/rachel_loop_engine/` — executable engine
+- `tests/` — deterministic tests
 
-## Current state
+## Next highest-ROI gate
 
-**M1 is complete. M2 executable orchestration foundation is complete and the M3 multi-variant coordinator is implemented against a mocked transport.** The next real-world gate is M2.5: attach the live Descript bridge and process the first raw Rachel video end-to-end.
+Run the first **real Rachel clip from a private supported URL**, inspect all three edits, score the loop seam and story truthfulness, then feed those observations back into `RACHEL_STYLE.md` and the prompt set.
