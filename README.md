@@ -4,60 +4,57 @@ A retention-first short-form video system for turning Rachel's raw vertical foot
 
 ## One-line goal
 
-`private raw video -> understand -> A/B/C edits -> loop if earned -> QC -> review renders -> learn`
+`private raw video -> understand -> A/B/C edits -> QC -> loop if earned -> review renders -> learn`
 
-## v0.5 status
+## v0.6 status
 
-This is now more than an editing playbook. The repository contains an executable, restart-safe orchestration foundation and its core Descript path has been smoke-tested live with synthetic media.
+The repository now contains the creative brain **and** a restart-safe one-input orchestration primitive. The core connected Descript path has been smoke-tested live with synthetic media.
 
 ### Implemented
 
-- Rachel-specific creative constitution and style rules
-- retention + loop playbooks
-- durable source/job/variant/artifact/QC models
-- complete JSON job manifests
-- deterministic plan validation
-- transport-neutral editor interface
-- Descript import → wait → agent → inspect → publish coordinator
-- canonical compositions:
-  - `00 Raw`
-  - `A Natural`
-  - `B Retention`
-  - `C Loop`
-- real composition-ID discovery instead of guessing
-- idempotent resume behavior that reuses existing projects/variants/renders
-- mock Descript transport for offline tests
-- CLI (`rle`)
-- machine-readable job schema
-- conservative analytics-learning foundation
+- Rachel-specific style, retention, loop, and truthfulness rules
+- durable job/variant/artifact/QC manifests
+- Descript import → async wait → agent → inspect → publish adapter
+- canonical `00 Raw`, `A Natural`, `B Retention`, `C Loop`
+- actual composition-ID discovery instead of guessing
+- idempotent resume behavior for projects, variants, and renders
+- structured media-aware QC with fail-closed JSON parsing
+- QC mutation fingerprint guard
+- automatic strongest-passing-variant recommendation
+- persisted `rle review-card job.json`
+- `full_treatment()` with **QC before render**
+- render only passing variants; no passing variant means no render
+- analytics/learning foundation with conservative evidence gates
 - Python 3.11/3.12 CI
-- live URL-based Descript integration verification
-- structured non-mutating media-aware QC
-- automatic variant recommendation + persisted review card
+- live synthetic verification of URL import, A/B/C creation, inspection, render, and QC contract
 
 ## Creative constitution
 
 1. Authenticity beats generic influencer editing.
 2. Retention per edit beats maximum editing.
-3. A loop is used only when it improves the video.
-4. The strongest moment may become the opening when that is truthful and clearer.
-5. The final second matters as much as the first.
-6. Every published video is an experiment.
-7. Rachel-specific evidence outranks generic advice.
-8. Never optimize metrics by making content materially misleading.
+3. A loop is optional and must earn its place.
+4. Reordering must remain materially truthful.
+5. The first and last seconds are both retention surfaces.
+6. Failed QC cannot be overruled by a flashy/high overall score.
+7. Rachel-specific evidence outranks generic social-media folklore.
+8. One viral video is a hypothesis, not a permanent rule.
 
-## Default output
+## Current private-media intake
 
-- 9:16 vertical
-- 1080x1920
-- 30 fps unless source/platform requires otherwise
-- captions enabled
+For Rachel's real footage, use a **private Drive/Dropbox/direct-access URL** supported by Descript. Direct chat-attachment upload is tracked in issue #1: Descript's signed upload handshake works, but this execution environment cannot perform the required external byte `PUT`.
+
+**Never use a public Git repository as transport for Rachel/family footage.**
+
+## Default deliverables
+
+- 9:16, 1080x1920, 30 fps unless source constraints require otherwise
 - natural dialogue cleanup
-- no forced CTA that harms the ending
-- meaningful variants only:
-  - **A — Natural**
-  - **B — Retention**
-  - **C — Loop**
+- readable phrase-based captions
+- A Natural
+- B Retention
+- C Loop only when it passes loop/truthfulness QC
+- unlisted review renders before intentional social posting
+- concise review card + recommendation
 
 ## Quick start
 
@@ -69,36 +66,20 @@ pytest
 
 rle new-job "https://example.com/private-source.mp4" --duration 32.5 --premise "family reaction" --out job.json
 rle dry-run job.json
+rle review-card job.json
 ```
 
-## Live integration status
+## Key docs
 
-The URL-based connected Descript path has been verified end-to-end using synthetic media:
-
-`URL import -> async wait -> 00 Raw -> agent -> A/B/C -> inspect -> UUID resolution -> 1080p unlisted render`
-
-Direct chat-attachment upload is not yet end-to-end in this execution environment: Descript returns the correct signed upload slot, but the current container cannot perform the external byte `PUT`. For Rachel's private footage, use a supported private Drive/Dropbox/direct-access URL until that byte bridge is added.
-
-**Never put private Rachel/family raw footage in this Git repository.**
-
-## Repository map
-
-- `AGENTS.md` — AI-agent non-negotiables
-- `WORKFLOW.md` — end-to-end operating procedure
+- `WORKFLOW.md` — creative operating procedure
 - `RACHEL_STYLE.md` — Rachel-specific editing voice
-- `RETENTION_RULES.md` — retention heuristics
-- `LOOP_PLAYBOOK.md` — loop construction/selection
-- `QUALITY_CONTROL.md` — pre-render QC
-- `architecture/PIPELINE.md` — technical architecture
-- `prompts/` — versioned editor prompts
-- `config/` — machine-readable defaults/learning gates
-- `analytics/` — measurement definitions and learned rules
-- `experiments/` — hypotheses and promoted winners
+- `LOOP_PLAYBOOK.md` — loop selection/construction
+- `QUALITY_CONTROL.md` — creative QC
 - `docs/LIVE_INTEGRATION_REPORT.md` — real connector validation
-- `docs/MEDIA_QC.md` — structured finished-video review contract
-- `src/rachel_loop_engine/` — executable engine
-- `tests/` — deterministic tests
+- `docs/MEDIA_QC.md` — structured finished-video reviewer
+- `docs/FULL_TREATMENT.md` — canonical one-input transaction
+- `docs/MILESTONES.md` — current implementation gates
 
 ## Next highest-ROI gate
 
-Run the first **real Rachel clip from a private supported URL**, inspect all three edits, score the loop seam and story truthfulness, then feed those observations back into `RACHEL_STYLE.md` and the prompt set.
+Run issue #2: one **real Rachel clip from a private supported URL** through `full_treatment()`, inspect the actual A/B/C behavior, and calibrate prompts/style from evidence.

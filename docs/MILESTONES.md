@@ -4,32 +4,19 @@
 Versioned Rachel-specific creative rules, retention rules, loop playbook, prompts, and QC principles.
 
 ## M2 — Executable Orchestration ✅
-- durable job/source/variant/QC/artifact models
-- complete JSON manifest round-tripping
-- deterministic dry-run validation
-- editor transport protocol
-- Descript coordinator
-- mock transport
-- CLI
-- CI tests
-- retry/idempotency safeguards
+Durable jobs/manifests, validation, transport boundary, Descript coordinator, mock transport, CLI, CI, retries/idempotency.
 
 ## M2.5 — Live Descript Bridge ✅ URL path
-Verified live with synthetic media:
-- URL import
-- async import wait
-- project agent mutation
-- canonical A/B/C creation
-- project inspection / UUID resolution
-- 1080p unlisted render
+Synthetic live test verified URL import → wait → agent mutation → A/B/C → inspection/UUID resolution → 1080p unlisted render → structured QC. Direct chat-attachment bytes remain issue #1; private Drive/Dropbox/direct-access URLs are the working intake path.
 
-Direct chat-attachment byte upload remains a transport gap because this execution environment cannot perform the signed external `PUT`. Drive/Dropbox/direct-access URLs are the current private-media path.
+## M3 — Automatic Multi-variant Production ✅ / 🟡 real-content calibration
+A/B/C creation, real-ID discovery, media-aware QC, persisted reviews, recommendation, and mutation guard are implemented. Real Rachel footage remains the calibration gate.
 
-## M3 — Automatic Multi-variant Production ✅ coordinator + media-aware QC / 🟡 real-content validation
-The coordinator creates/resolves/publishes A Natural, B Retention, and C Loop, reuses existing state on retries, runs structured non-mutating QC, persists review results, and recommends the strongest passing variant. The next gate is calibration on a real Rachel clip.
+## M3.5 — One-input Full Treatment ✅
+`full_treatment()` sequences create/reuse → A/B/C → media-aware QC → reject failures → render only passing variants → persist recommendation/status. No passing variants means no renders.
 
 ## M4 — Analytics Learning Loop 🟡 foundation
-Ingest retention/replay/completion metrics, compare variants, and promote repeatable wins only after an evidence gate.
+Metrics normalization, relative lift, and conservative evidence promotion exist; real post data is still needed.
 
 ## M5 — Drop-folder / one-button intake
 A private raw video landing in the intake location creates a job automatically and returns finished outputs plus a concise review card.

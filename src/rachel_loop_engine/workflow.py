@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 from .adapters.descript import CompositionRef, DescriptAdapter, DescriptProjectRef
-from .models import QcResult, VariantArtifact, VariantKind, VideoJob
+from .models import JobStatus, QcResult, VariantArtifact, VariantKind, VideoJob
 from .prompts import PromptBook
 from .review import MediaReview, parse_media_review, recommend_variant, review_to_dict
 
@@ -12,6 +12,15 @@ VARIANT_NAMES: dict[VariantKind, str] = {
     "retention": "B Retention",
     "loop": "C Loop",
 }
+
+
+@dataclass
+class TreatmentResult:
+    project_id: str
+    reviews: list[MediaReview] = field(default_factory=list)
+    artifacts: list[VariantArtifact] = field(default_factory=list)
+    recommended_variant: VariantKind | None = None
+    warnings: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -24,11 +33,57 @@ class WorkflowResult:
 
 
 class DescriptWorkflowRunner:
-    """Idempotent one-source -> named variants -> review renders coordinator."""
+    """Idempotent one-source -> named variants -> QC -> review renders coordinator."""
 
     def __init__(self, adapter: DescriptAdapter, prompts: PromptBook):
         self.adapter = adapter
         self.prompts = prompts
+
+    def full_treatment(
+        self,
+        job: VideoJob,
+        *,
+        publish_all_passing: bool = True,
+    ) -> TreatmentResult:
+        """Run the canonical one-input transaction from source to review renders.
+
+        Rendering happens only after media-aware QC. Failed variants are never
+        rendered by this method.
+        """
+        job.status = JobStatus.EDITING
+        job.touch()
+        project_id = self.prepare_variants(job)
+
+        job.status = JobStatus.QC
+        job.touch()
+        reviews = self.review_variants(job)
+        recommendation = recommend_variant(reviews)
+        passing = [r.kind for r in reviews if r.passed]
+        if not passing or recommendation is None:
+            job.status = JobStatus.FAILED
+            job.metadata["failure_reason"] = "no variant passed media-aware QC"
+            job.touch()
+            return TreatmentResult(
+                project_id=project_id,
+                reviews=reviews,
+                recommended_variant=None,
+                warnings=["No variant passed media-aware QC; nothing was rendered."],
+            )
+
+        render_kinds = tuple(passing) if publish_all_passing else (recommendation,)
+        job.status = JobStatus.EXPORTING
+        job.touch()
+        published = self.publish_variants(job, kinds=render_kinds)
+        job.status = JobStatus.COMPLETE
+        job.metadata.pop("failure_reason", None)
+        job.touch()
+        return TreatmentResult(
+            project_id=project_id,
+            reviews=reviews,
+            artifacts=published.artifacts,
+            recommended_variant=recommendation,
+            warnings=published.warnings,
+        )
 
     def prepare_variants(self, job: VideoJob) -> str:
         project_id = str(job.metadata.get("descript_project_id", ""))
@@ -85,23 +140,22 @@ class DescriptWorkflowRunner:
                 continue
 
             published = self.adapter.publish(DescriptProjectRef(project_id, comp.id))
-            artifact = VariantArtifact(
-                kind=kind,
-                project_id=project_id,
-                composition_id=comp.id,
-                share_url=published.get("share_url"),
-                metadata={
+            artifact = self._artifact_for_composition(job, kind, project_id, comp.id)
+            if artifact is None:
+                artifact = VariantArtifact(kind=kind, project_id=project_id, composition_id=comp.id)
+                job.artifacts.append(artifact)
+            artifact.share_url = published.get("share_url")
+            artifact.metadata.update(
+                {
                     "composition_name": VARIANT_NAMES[kind],
                     "duration": comp.duration,
                     "render_access": "unlisted",
-                },
+                }
             )
-            job.artifacts.append(artifact)
             result.artifacts.append(artifact)
 
         job.touch()
         return result
-
 
     def review_variants(
         self,
@@ -186,15 +240,8 @@ class DescriptWorkflowRunner:
         project_id: str,
         composition_id: str,
     ) -> VariantArtifact | None:
-        for artifact in job.artifacts:
-            if (
-                artifact.kind == kind
-                and artifact.project_id == project_id
-                and artifact.composition_id == composition_id
-                and artifact.share_url
-            ):
-                return artifact
-        return None
+        artifact = DescriptWorkflowRunner._artifact_for_composition(job, kind, project_id, composition_id)
+        return artifact if artifact is not None and artifact.share_url else None
 
 
 def _duration_changed(before: float | None, after: float | None, tolerance: float = 0.05) -> bool:
